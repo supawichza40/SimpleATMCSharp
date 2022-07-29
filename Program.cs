@@ -10,6 +10,11 @@ namespace SimpleATMProject
     {
         static void Main(string[] args)
         {
+            Card dearCard = new Card();
+            ATMMachine atm = new ATMMachine();
+            atm.InsertCard(dearCard);
+
+            Console.ReadKey();
         }
     }
 }
