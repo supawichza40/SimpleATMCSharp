@@ -9,22 +9,23 @@ namespace SimpleATMProject
     class ATMMachine
     {
         private bool _accessGranted;
+        Card userCard;
         public ATMMachine()
         {
-
+            
         }
         public void InsertCard(Card c)
         {
+            userCard = c;
             bool returnCard = false;
-            while ( !_accessGranted&&!returnCard) {
-                
-                _accessGranted = c.isValidPin(out returnCard);
-            }
-            MainATMSystemAfterVerification();
-            if (returnCard)
+            while (!returnCard)
             {
-                RemoveCard();
+                _accessGranted = c.UserAuthentication(out returnCard);
+                MainATMSystemAfterVerification();
             }
+            RemoveCard();
+
+            
 
 
         }
@@ -32,13 +33,58 @@ namespace SimpleATMProject
         {
             Console.WriteLine("Card Returned");
             _accessGranted = false;
+            userCard = null;
         }
-        public void MainATMSystemAfterVerification()
+        private int GetBalance()
+        {
+            return userCard.Balance;
+        }
+        
+        
+        private void MainATMSystemAfterVerification()
         {
             while (_accessGranted) 
             {
                 Console.WriteLine("Main System");
-                RemoveCard();
+                Console.WriteLine("What would you like to do? 0.Remove card 1.balance 2.deposit 3.view statement 4.Withdraw 5.change pin");
+                string userInput = Console.ReadLine();
+                switch (userInput)
+                {
+                    case "0":
+                        Console.WriteLine("Remove your card");
+                        RemoveCard();
+                        break;
+                    case "1":
+                        Console.WriteLine("Getting your balance...");
+                        Reader.DisplayBalance(GetBalance());
+                        break;
+                    case "2":
+                        Console.Write("Deposit your cash:£");
+                        string depositAmount = Console.ReadLine();
+                        userCard.Deposit(Int32.Parse(depositAmount));
+                        break;
+                    case "3":
+                        Console.WriteLine("View Statement");
+                        foreach (var item in userCard.transactions)
+                        {
+                            Console.WriteLine(item);
+                        }
+                        Console.WriteLine("End of statement");
+                        break;
+                    case "4":
+                        Console.Write("Withdraw");
+                        string withdrawAmount = Console.ReadLine();
+                        if (userCard.isWithdrawAllow(Int32.Parse(withdrawAmount)))
+                        {
+                            
+                            userCard.Withdraw(Int32.Parse(withdrawAmount));
+                        }
+                        
+
+                        break;
+
+                }
+                
             } 
         }
     }

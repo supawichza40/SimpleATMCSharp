@@ -19,6 +19,20 @@ namespace SimpleATMProject
             }
             return str.ToString();
         }
+        
+    }
+    static class Reader
+    {
+        public static string GetUserPin(string question)
+        {
+            Console.WriteLine("Please Input your Pin? 0 to return card");
+            string userInputPin = Console.ReadLine();
+            return userInputPin;
+        }
+        public static void DisplayBalance(int balance)
+        {
+            Console.WriteLine($"Your Balance:£ {balance}");
+        }
     }
     class Card
     {
@@ -31,6 +45,9 @@ namespace SimpleATMProject
         public int numberPinTried = 0;
         private string _firstName;
         private string _lastName;
+        private int _balance = 0;
+        internal Stack<string> transactions = new Stack<string>();
+        
         const int pinDigit = 4;
         const int accountNumberDigit = 8;
         const int cardNumberDigit = 16;
@@ -53,6 +70,8 @@ namespace SimpleATMProject
         public string SecurityNumber { get => _securityNumber; }
         public string FirstName { get => _firstName; set => _firstName = value; }
         public string LastName { get => _lastName; set => _lastName = value; }
+        public int Balance { get => _balance;}
+
         #endregion
         #region Constructor
         public Card()
@@ -64,31 +83,20 @@ namespace SimpleATMProject
             _sortcode = NumberGenerator.GenerateNumberNTimes(sortCodeDigit);
             _securityNumber = NumberGenerator.GenerateNumberNTimes(securityNumberDigit);
             showCardDetail();
+
             Console.WriteLine($"Secret: Please remember your pin: {_pin}");
         }
         #endregion
 
         #region Method and Function
-        public bool isValidPin(out bool returnCard)
+        public bool IsCardExceedPinLimit(out bool returnCard)
         {
             returnCard = false;
             if (numberPinTried < 3)
             {
-                Console.WriteLine("Please Input your Pin? 0 to return card");
-                string userInputPin = Console.ReadLine();
-                
-                if (userInputPin == "0")
-                {
-                    returnCard = true;
-                }
-                if (userInputPin== _pin)
-                {
-                    Console.WriteLine("Access Granted");
-                    return true;
-                }
-                Console.WriteLine("Access Denied");
-                numberPinTried += 1;
                 return false;
+
+
             }
             else
             {
@@ -98,6 +106,34 @@ namespace SimpleATMProject
             
 
         }
+        public bool VerifyPin(string userPin)
+        {
+            if (userPin == _pin)
+            {
+                Console.WriteLine("Access Granted");
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("Access Denied");
+                numberPinTried += 1;
+                return false;
+            }
+        }
+        public bool UserAuthentication(out bool returnCard)
+        {
+            
+            if(!IsCardExceedPinLimit(out returnCard))
+            {
+                string userPin = Reader.GetUserPin("Pin! 0 to return card");
+                if (userPin == "0")
+                {
+                    returnCard = true;
+                }
+                return VerifyPin(userPin);
+            }
+            return false;
+        }
         public void showCardDetail()
         {
             Console.WriteLine($"Card Number:{CardNumber}");
@@ -105,7 +141,28 @@ namespace SimpleATMProject
             Console.WriteLine($"Account Number:{AccountNumber}");
             Console.WriteLine($"Security Number:{SecurityNumber}");
         }
-        
+        public bool isWithdrawAllow(int amount)
+        {
+            if (amount > _balance)
+            {
+                Console.WriteLine("Withdraw Limit exceed, please try other amount");
+                return false;
+            }
+            return true;
+
+        }
+        public void Withdraw(int amount)
+        {
+            transactions.Push($"{nameof(Withdraw)}:-{amount}");
+            _balance -= amount;
+        }
+        public void Deposit(int amount)
+        {
+            _balance += amount;
+            transactions.Push($"{nameof(Deposit)}:{amount}");
+
+        }
+
         #endregion
     }
 }

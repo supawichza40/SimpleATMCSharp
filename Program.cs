@@ -14,6 +14,7 @@ namespace SimpleATMProject
             ATMMachine atm = new ATMMachine();
             atm.InsertCard(dearCard);
 
+
             Console.ReadKey();
         }
     }
