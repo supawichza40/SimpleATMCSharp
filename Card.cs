@@ -33,6 +33,12 @@ namespace SimpleATMProject
         {
             Console.WriteLine($"Your Balance:£ {balance}");
         }
+        public static string GetInputFromUserWithAnyQuestion(string question)
+        {
+            Console.WriteLine(question);
+            string userAnswer = Console.ReadLine();
+            return userAnswer;
+        }
     }
     class Card
     {
@@ -46,14 +52,15 @@ namespace SimpleATMProject
         private string _firstName;
         private string _lastName;
         private int _balance = 0;
+        private bool _isAuthenticated = false;
         internal Stack<string> transactions = new Stack<string>();
-        
-        const int pinDigit = 4;
+        //Const is a statically type, and not belong to a single instance.
+        public const int pinDigit = 4;
         const int accountNumberDigit = 8;
         const int cardNumberDigit = 16;
         const int sortCodeDigit = 6;
         const int securityNumberDigit = 3;
-
+        
         #endregion
         #region Property
         public string CardNumber { 
@@ -71,6 +78,7 @@ namespace SimpleATMProject
         public string FirstName { get => _firstName; set => _firstName = value; }
         public string LastName { get => _lastName; set => _lastName = value; }
         public int Balance { get => _balance;}
+        public bool IsAuthenticated { get => _isAuthenticated; }
 
         #endregion
         #region Constructor
@@ -120,7 +128,7 @@ namespace SimpleATMProject
                 return false;
             }
         }
-        public bool UserAuthentication(out bool returnCard)
+        public void UserAuthentication(out bool returnCard)
         {
             
             if(!IsCardExceedPinLimit(out returnCard))
@@ -130,9 +138,10 @@ namespace SimpleATMProject
                 {
                     returnCard = true;
                 }
-                return VerifyPin(userPin);
+                _isAuthenticated = VerifyPin(userPin);
+                return;
             }
-            return false;
+            _isAuthenticated = false;
         }
         public void showCardDetail()
         {
@@ -153,14 +162,26 @@ namespace SimpleATMProject
         }
         public void Withdraw(int amount)
         {
-            transactions.Push($"{nameof(Withdraw)}:-{amount}");
-            _balance -= amount;
+            if (isWithdrawAllow(amount))
+            {
+                transactions.Push($"{nameof(Withdraw)}:-{amount}");
+                _balance -= amount;
+            }
+
         }
         public void Deposit(int amount)
         {
             _balance += amount;
             transactions.Push($"{nameof(Deposit)}:{amount}");
 
+        }
+        public void ChangePinNumber(string newPin)
+        {
+            _pin = newPin;
+        }
+        public void RemoveCard()
+        {
+            _isAuthenticated = false;
         }
 
         #endregion

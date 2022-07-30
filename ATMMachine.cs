@@ -8,7 +8,6 @@ namespace SimpleATMProject
 {
     class ATMMachine
     {
-        private bool _accessGranted;
         Card userCard;
         public ATMMachine()
         {
@@ -20,7 +19,7 @@ namespace SimpleATMProject
             bool returnCard = false;
             while (!returnCard)
             {
-                _accessGranted = c.UserAuthentication(out returnCard);
+                c.UserAuthentication(out returnCard);
                 MainATMSystemAfterVerification();
             }
             RemoveCard();
@@ -32,8 +31,7 @@ namespace SimpleATMProject
         public void RemoveCard()
         {
             Console.WriteLine("Card Returned");
-            _accessGranted = false;
-            userCard = null;
+            userCard.RemoveCard();
         }
         private int GetBalance()
         {
@@ -43,7 +41,7 @@ namespace SimpleATMProject
         
         private void MainATMSystemAfterVerification()
         {
-            while (_accessGranted) 
+            while (userCard.IsAuthenticated) 
             {
                 Console.WriteLine("Main System");
                 Console.WriteLine("What would you like to do? 0.Remove card 1.balance 2.deposit 3.view statement 4.Withdraw 5.change pin");
@@ -72,20 +70,26 @@ namespace SimpleATMProject
                         Console.WriteLine("End of statement");
                         break;
                     case "4":
-                        Console.Write("Withdraw");
+                        Console.Write("Withdraw:£");
                         string withdrawAmount = Console.ReadLine();
-                        if (userCard.isWithdrawAllow(Int32.Parse(withdrawAmount)))
-                        {
-                            
-                            userCard.Withdraw(Int32.Parse(withdrawAmount));
-                        }
+                        userCard.Withdraw(Int32.Parse(withdrawAmount));
+                        break;
+                    case "5":
+                        Console.WriteLine("Change Pin");
                         
+                        string newPin = Reader.GetInputFromUserWithAnyQuestion("What is your new Pin?");
+                        while (!Verifier.IsNumber(newPin) && !Verifier.digitVerifier(newPin, Card.pinDigit))
+                        {
+                            Console.WriteLine("Invalid Pin try again!");
+                            newPin = Reader.GetInputFromUserWithAnyQuestion("What is your new Pin?");
+                        }
 
                         break;
 
                 }
                 
-            } 
+            }
+            userCard = null;
         }
     }
 }

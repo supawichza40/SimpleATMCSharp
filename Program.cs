@@ -13,7 +13,7 @@ namespace SimpleATMProject
             Card dearCard = new Card();
             ATMMachine atm = new ATMMachine();
             atm.InsertCard(dearCard);
-
+            Console.WriteLine(Verifier.IsNumber("121"));
 
             Console.ReadKey();
         }
